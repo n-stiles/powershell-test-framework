@@ -1,0 +1,66 @@
+function New-ProjectFixture {
+    <#
+    .SYNOPSIS
+    Creates a new script and matching Unit and/or Integration tests.
+    #>
+
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
+        [string]$Name,
+
+        [switch]$UnitOnly,
+        [switch]$IntegrationOnly
+    )
+
+    Set-StrictMode -Version Latest
+
+    if ($UnitOnly -and $IntegrationOnly) {
+        throw 'Invalid flags: -UnitOnly and -IntegrationOnly cannot be used together.'
+    }
+
+    $createUnit        = -not $IntegrationOnly
+    $createIntegration = -not $UnitOnly
+
+    # --- TDD Enforcement --- 
+    
+    if (-not $createUnit) {
+        throw 'Unit tests must be created before or alongside the script.'
+
+@"
+        Use:
+        New-ProjectFixture -Name $Name
+        or
+        New-UnitTest $Name
+
+        Creating scripts without unit tests is not allowed.
+"@
+    }
+
+    $paths = Resolve-ProjectPaths
+
+    $sutPath = Join-Path $paths.ScriptsRoot "$Name.ps1"
+    if (Test-Path $sutPath) {
+        throw "SUT already exists: $sutPath"
+    }
+
+
+    # --- Create SUT ---
+    New-Item -ItemType File -Path $sutPath -Force | Out-Null
+    New-SutTemplate -Name $Name | Set-Content -Path $sutPath -Encoding UTF8
+
+    if ($createUnit) {
+        $unitPath = Join-Path $paths.UnitTestsRoot "$Name.Unit.Tests.ps1"
+        New-Item -ItemType File -Path $unitPath -Force | Out-Null
+        New-UnitTestTemplate -Name $Name | Set-Content -Path $unitPath -Encoding UTF8
+    }
+
+    if ($createIntegration) {
+        $intPath = Join-Path $paths.IntegrationTestsRoot "$Name.Integration.Tests.ps1"
+        New-Item -ItemType File -Path $intPath -Force | Out-Null
+        New-IntegrationTestTemplate -Name $Name | Set-Content -Path $intPath -Encoding UTF8
+    }
+
+    Write-Host "Project fixture created: $Name" -ForegroundColor Green
+}

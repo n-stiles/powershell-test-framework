@@ -1,0 +1,10 @@
+$fixtureRoot = Join-Path $PSScriptRoot 'New.ProjectFixture'
+
+# Load everything consistently
+Get-ChildItem "$fixtureRoot\Private\*.ps1" | ForEach-Object {
+    . $_.FullName
+}
+
+Get-ChildItem "$fixtureRoot\Public\*.ps1" | ForEach-Object {
+    . $_.FullName
+}
