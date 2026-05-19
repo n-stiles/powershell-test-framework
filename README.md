@@ -32,12 +32,17 @@ Providing pluggable mock hooks
 
 ### Installation
 
-To install the module locally for repeated use, follow these steps:
-1. clone the git repo  
-2. Register the module
-3. Import the module 
+To install the module locally for repeated use:  
+  
+  1. Clone the Git repository  
+  2. Register a local PowerShell repository (one-time setup)  
+  3. Publish the module to the local repository  
+  4. Install and import the module  
+  
+One-Time Repository Setup
 
-Create module folder and register the repository (only needs to be done once)
+Create a local repository folder:
+
 ```
 New-Item -Path C:\MyLocalRepo -ItemType Directory
 ```
@@ -50,10 +55,16 @@ Register-PSRepository `
     -InstallationPolicy Trusted
 ```
 
+Publish the Module  
+
+The module source is located under src to support multiple modules within the same repository.  
+
+Publish the module to the local repository:  
+
 ```
 Publish-Module `
-    -Path "C:\Users\dialu\source\repos\n-stiles\powershell-test-framework" `
-    -Repository MyLocalRepo
+    -Path "PATHTOPROJECT\powershell-test-framework\src\powershell-test-framework" `
+    -Repository MyLocalRepoepository MyLocalRepo
 ```
 
 This should create C:\MyLocalRepo\
@@ -61,16 +72,19 @@ This should create C:\MyLocalRepo\
 
 Verify 
 ```
-Find-Module -Repository "MyLocalRepo"
+Find-Module -Repository MyLocalRepo
 ```
 
 ```
 Install-Module `
-    -Name project-test-framework `
+    -Name powershell-test-framework `
     -Repository MyLocalRepo `
     -Scope CurrentUser
 ```
 
+```
+Import-Module powershell-test-framework
+```
 
 ### In lieu of installing the module, you can also copy the Public and Private folders to your project  
 ### and dot source the Use-NewSqlFixture.ps1 script in your test files.
